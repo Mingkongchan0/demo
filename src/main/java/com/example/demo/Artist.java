@@ -31,7 +31,7 @@ public class Artist extends HttpServlet
 {
     Database db;
 
-    Inventory inv = new Inventory();
+    private final Inventory inv = new Inventory(new ArrayList<>());
 
     @PostMapping("/SetArtist/")
     @ResponseBody
@@ -40,21 +40,19 @@ public class Artist extends HttpServlet
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(stringdb);
             Iterator<JsonNode> it = root.iterator();
-            db = new Database(new ArrayList<Inventory>());
-            db.list = new ArrayList<Inventory>();
-
         while (it.hasNext())
         {
 
             JsonNode Inventory = it.next();
-            inv.setArtist(Inventory.findValue("Artist").toString());
+            Inventory temp = new Inventory(new ArrayList<>());
+            temp.setArtist(Inventory.findValue("Artist").toString());
 
-            inv.setAlbum(Inventory.findValue("Album").toString());
+            temp.setAlbum(Inventory.findValue("Album").toString());
 
-            inv.setQuantity(Inventory.findValue("Quantity").asInt());
+            temp.setQuantity(Inventory.findValue("Quantity").asInt());
 
-            inv.setPrice(Inventory.findValue("Price").asInt());
-            db.list.add(inv);
+            temp.setPrice(Inventory.findValue("Price").asInt());
+            inv.list.add(temp);
         }
     }
     @GetMapping("/GetArtist/{array}/")
