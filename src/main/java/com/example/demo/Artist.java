@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.*;
 import org.apache.coyote.Response;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,11 +15,9 @@ import javax.annotation.PostConstruct;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.validation.Valid;
+import javax.validation.constraints.Null;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 
 @WebServlet(name = "ArtistServlet", urlPatterns = "/ArtistServlet")
@@ -33,17 +32,14 @@ public class Artist extends HttpServlet
 
     private final Inventory inv = new Inventory(new ArrayList<>());
 
-    @PostMapping("/SetArtist/")
+    @PostMapping("/SetInventory/")
     @ResponseBody
-    public void setArtist(@Valid @RequestBody @NonNull String stringdb ) throws JsonProcessingException
+    public void setInventory(@Valid @RequestBody @NonNull String stringdb ) throws JsonProcessingException
     {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(stringdb);
-            Iterator<JsonNode> it = root.iterator();
-        while (it.hasNext())
-        {
+        for (JsonNode Inventory : root) {
 
-            JsonNode Inventory = it.next();
             Inventory temp = new Inventory(new ArrayList<>());
             temp.setArtist(Inventory.findValue("Artist").toString());
 
@@ -55,27 +51,42 @@ public class Artist extends HttpServlet
             inv.list.add(temp);
         }
     }
-    @GetMapping("/GetArtist/{array}/")
+    @GetMapping("/GetInventory/{strIndex}")
     @ResponseBody
-    public ResponseEntity<Database> getArtist(@PathVariable String array)
-    {
-        return ResponseEntity.ok(db);
+    public ResponseEntity<Inventory> getInventory(@NonNull @Valid @RequestBody @PathVariable String strIndex){
+        Inventory index = inv.list.get(Integer.parseInt(strIndex));
+        return ResponseEntity.ok(index);
     }
 
-    @RequestMapping("/UpdateArtist/")
+    @RequestMapping("/UpdateInventory/{strIndex}")
     @ResponseBody
-    public void updateArtist()
+    public void updateInventory(@Valid @RequestBody  @PathVariable String strIndex, @RequestBody @Valid @NonNull String stringdb) throws JsonProcessingException
     {
-        List <Inventory> database = db.getList();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode root = objectMapper.readTree(stringdb);
+        for (JsonNode jsonNode : root) {
+            Inventory index = inv.list.get(Integer.parseInt(strIndex));
 
+            if ((jsonNode.findValue("Artist") != null)) {
+                index.setArtist(jsonNode.findValue("Artist").toString());
+            }
 
-        inv.getArtist();
+            if ((jsonNode.findValue("Album") != null)) {
+                index.setAlbum(jsonNode.findValue("Album").toString());
+            }
 
-        inv.getAlbum();
+            if ((jsonNode.findValue("Quantity") != null)) {
+                index.setQuantity(jsonNode.findValue("Quantity").asInt());
+            }
 
-        inv.getQuantity();
-
-        inv.getPrice();
-
+            if ((jsonNode.findValue("Price") != null)) {
+                index.setPrice(jsonNode.findValue("Price").asInt());
+            }
+        }
+    }
+    @RequestMapping("/DelInventory/{strIndex}")
+    @ResponseBody
+    public void delInventory(@Valid @RequestBody @PathVariable String strIndex){
+        inv.list.set(Integer.parseInt(strIndex), null);
     }
 }
