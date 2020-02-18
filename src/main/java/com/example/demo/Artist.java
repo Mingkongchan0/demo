@@ -4,31 +4,23 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.*;
-import org.apache.coyote.Response;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import java.io.*;
-import javax.annotation.PostConstruct;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.validation.Valid;
-import javax.validation.constraints.Null;
-import java.lang.reflect.Array;
 import java.util.*;
-
-
 @WebServlet(name = "ArtistServlet", urlPatterns = "/ArtistServlet")
 @RestController @RequiredArgsConstructor
-@EnableAutoConfiguration
+@EnableAutoConfiguration @ComponentScan @Configuration
 //Controller
 
 
 public class Artist extends HttpServlet
 {
-    Database db;
 
     private final Inventory inv = new Inventory(new ArrayList<>());
 
@@ -53,9 +45,16 @@ public class Artist extends HttpServlet
     }
     @GetMapping("/GetInventory/{strIndex}")
     @ResponseBody
-    public ResponseEntity<Inventory> getInventory(@NonNull @Valid @RequestBody @PathVariable String strIndex){
+    public ResponseEntity<Inventory> getInventory(@NonNull @Valid @RequestBody @PathVariable String strIndex)
+    {
         Inventory index = inv.list.get(Integer.parseInt(strIndex));
         return ResponseEntity.ok(index);
+    }
+    @GetMapping("GetInventory/all")
+    @ResponseBody
+    public ResponseEntity <ArrayList<Inventory>> getAllInventory()
+    {
+        return ResponseEntity.ok(inv.list);
     }
 
     @RequestMapping("/UpdateInventory/{strIndex}")
@@ -86,7 +85,9 @@ public class Artist extends HttpServlet
     }
     @RequestMapping("/DelInventory/{strIndex}")
     @ResponseBody
-    public void delInventory(@Valid @RequestBody @PathVariable String strIndex){
+    public void delInventory(@Valid @RequestBody @PathVariable String strIndex)
+    {
         inv.list.set(Integer.parseInt(strIndex), null);
     }
+
 }
