@@ -1,12 +1,10 @@
 package com.example.demo;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.*;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.annotation.WebServlet;
@@ -15,33 +13,30 @@ import javax.validation.Valid;
 import java.util.*;
 @WebServlet(name = "ArtistServlet", urlPatterns = "/ArtistServlet")
 @RestController @RequiredArgsConstructor
-@EnableAutoConfiguration @ComponentScan @Configuration
+@EnableAutoConfiguration
 //Controller
 
 
 public class Artist extends HttpServlet
 {
-
-    private final Inventory inv = new Inventory(new ArrayList<>());
+    private final Inventory inv = new Inventory();
 
     @PostMapping("/SetInventory/")
     @ResponseBody
-    public void setInventory(@Valid @RequestBody @NonNull String stringdb ) throws JsonProcessingException
+    public void setInventory(@NotNull @Valid @RequestBody @NonNull JsonNode jsonnode )
     {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode root = objectMapper.readTree(stringdb);
-        for (JsonNode Inventory : root) {
+            Inventory temp = new Inventory();
 
-            Inventory temp = new Inventory(new ArrayList<>());
-            temp.setArtist(Inventory.findValue("Artist").toString());
+            temp.setArtist(jsonnode.findValue("Artist").toString());
 
-            temp.setAlbum(Inventory.findValue("Album").toString());
+            temp.setAlbum(jsonnode.findValue("Album").toString());
 
-            temp.setQuantity(Inventory.findValue("Quantity").asInt());
+            temp.setQuantity(jsonnode.findValue("Quantity").asInt());
 
-            temp.setPrice(Inventory.findValue("Price").asInt());
+            temp.setPrice(jsonnode.findValue("Price").floatValue());
+
             inv.list.add(temp);
-        }
+
     }
     @GetMapping("/GetInventory/{strIndex}")
     @ResponseBody
@@ -59,29 +54,26 @@ public class Artist extends HttpServlet
 
     @RequestMapping("/UpdateInventory/{strIndex}")
     @ResponseBody
-    public void updateInventory(@Valid @RequestBody  @PathVariable String strIndex, @RequestBody @Valid @NonNull String stringdb) throws JsonProcessingException
+    public void updateInventory(@Valid @RequestBody  @PathVariable String strIndex, @NotNull @RequestBody @Valid @NonNull JsonNode jsonnode)
     {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode root = objectMapper.readTree(stringdb);
-        for (JsonNode jsonNode : root) {
             Inventory index = inv.list.get(Integer.parseInt(strIndex));
 
-            if ((jsonNode.findValue("Artist") != null)) {
-                index.setArtist(jsonNode.findValue("Artist").toString());
+            if ((jsonnode.findValue("Artist") != null)) {
+                index.setArtist(jsonnode.findValue("Artist").toString());
             }
 
-            if ((jsonNode.findValue("Album") != null)) {
-                index.setAlbum(jsonNode.findValue("Album").toString());
+            if ((jsonnode.findValue("Album") != null)) {
+                index.setAlbum(jsonnode.findValue("Album").toString());
             }
 
-            if ((jsonNode.findValue("Quantity") != null)) {
-                index.setQuantity(jsonNode.findValue("Quantity").asInt());
+            if ((jsonnode.findValue("Quantity") != null)) {
+                index.setQuantity(jsonnode.findValue("Quantity").asInt());
             }
 
-            if ((jsonNode.findValue("Price") != null)) {
-                index.setPrice(jsonNode.findValue("Price").asInt());
+            if ((jsonnode.findValue("Price") != null)) {
+                index.setPrice(jsonnode.findValue("Price").floatValue());
             }
-        }
+
     }
     @RequestMapping("/DelInventory/{strIndex}")
     @ResponseBody

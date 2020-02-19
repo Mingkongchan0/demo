@@ -1,18 +1,20 @@
 package com.example.demo;
 
 import lombok.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.util.ArrayList;
-
-@Getter @Setter @EqualsAndHashCode @ToString
+@Data
+@NoArgsConstructor @Getter @Setter @EqualsAndHashCode @ToString @Entity
 public class Inventory extends Database{
+        @Id
+        @GeneratedValue (strategy = GenerationType.AUTO)
+        private Integer id;
         private String Artist;
         private String Album;
         private Integer Quantity;
-        private Integer Price;
-
-
-        public Inventory(@NonNull ArrayList<Inventory> list) {
-                super(list);
-        }
+        private Float Price;
 }
 
